@@ -51,7 +51,7 @@ function List(){
     }
   }
   function useOnChange(e){
-    setlabel(e.target.value)
+    setlabel(e.target.value);
   }
   
   return(
