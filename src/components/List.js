@@ -10,19 +10,49 @@ function List(){
 
   const [count, setcount] = useState(0);
 
+  const [check, setcheck] = useState(false);
+
+  const [itemListDone, setitemListDone] = useState([]);
+
+  const [itemListActive, setitemListActive] = useState([]);
+
+  const [state, setState] = useState(1);
+
+  function setStateOne(){
+    setState(1);
+  }
+
+  function createListDone(){
+    setitemListDone(itemList.filter((itemtodo) => 
+      itemtodo.done && {...itemtodo}
+    ));
+    setState(2);
+  }
+
+  function createListActive(){
+    setitemListActive(itemList.filter((itemtodo) => 
+      !itemtodo.done && {...itemtodo}
+    ));
+
+    setState(3);
+  }
+
+
   useEffect(() => {
     setcount(itemList.reduce((result,itemTodo) => {
       return result + (itemTodo.done ? 0 : 1);
     }, 0))
   }, [itemList])
-    
-  //Function to add a item 
+
   function addItem(text){
     const id = uuidv4();
-    const newItem = {id,done:false,label:text};
-    const newList = [...itemList,newItem];
-    setItemList(newList);
-    localStorage.setItem('todosCarlos',JSON.stringify(newList));
+    if(text !== ''){
+      const newItem = {id,done:false,label:text.trim()};
+      const newList = [...itemList,newItem];
+      updateLocalStore(newList);
+      setitemListActive([...itemListActive,newItem]);
+    }
+    
   }
 
   function updateItem(item){
@@ -30,16 +60,26 @@ function List(){
     const newList = itemList.map((itemtodo) => 
       itemtodo.id === id ? {...item} : itemtodo
     );
-    setItemList(newList);
-    localStorage.setItem('todosCarlos',JSON.stringify(newList));
+
+    const newListDone = newList.filter((itemtodo) => 
+    itemtodo.done && {...itemtodo}
+    );
+
+    const newListActive = newList.filter((itemtodo) => 
+    !itemtodo.done && {...itemtodo}
+    );
+
+    setitemListActive(newListActive);
+    setitemListDone(newListDone);
+    updateLocalStore(newList);
   }
+
   function deleteItem(item){
     const id = item.id
     const newList = itemList.filter((itemtodo) =>
         itemtodo.id !==  id
     )
-    setItemList(newList);
-    localStorage.setItem('todosCarlos',JSON.stringify(newList));
+    updateLocalStore(newList);
   }
 
   function useEnter(e){
@@ -50,10 +90,47 @@ function List(){
       setlabel('');
     }
   }
+
   function useOnChange(e){
     setlabel(e.target.value);
   }
+
+  function updateLocalStore(newlist){
+    setItemList(newlist);
+    localStorage.setItem('todosCarlos',JSON.stringify(newlist));
+  }
+
+  function doneAll(){
+    
+    const newList = itemList.map((itemtodo) => {
+      
+      itemtodo.done = check ? false : true;
+      return {...itemtodo}
+    }      
+    );
+
+    const newListDone = newList.filter((itemtodo) => 
+    itemtodo.done && {...itemtodo}
+    );
+
+    const newListActive = newList.filter((itemtodo) => 
+    !itemtodo.done && {...itemtodo}
+    );
+
+    setitemListActive(newListActive);
+    setitemListDone(newListDone);
+
+    setcheck(!check);
+    updateLocalStore(newList);
+  }
   
+  function clearCompleted(){
+    const newList = itemList.filter((itemtodo) => 
+      itemtodo.done === false && {...itemtodo} 
+    );
+    updateLocalStore(newList);
+  }
+
   return(
     <React.Fragment>
       <header className="header">
@@ -61,7 +138,7 @@ function List(){
         <input
           className="new-todo"
           placeholder="What needs to be done?"
-          onKeyDown={useEnter}
+          onKeyPress={useEnter}
           value={label}
           onChange={useOnChange}
         />
@@ -71,15 +148,18 @@ function List(){
           id="toggle-all"
           type="checkbox"
           className="toggle-all"
+          onChange={doneAll}
         />
         <label htmlFor="toggle-all" />
         <ul className="todo-list">
-          {itemList.map((itemTodo) => (
+          {
+          state === 1 ? itemList.map((itemTodo) => (
             <Item key = {itemTodo.id} todo={itemTodo} updateItem={updateItem} deleteItem={deleteItem}/>
-          ))
-            
-          }
-            
+          )) : state === 2 ? itemListDone.map((itemTodo) => (
+            <Item key = {itemTodo.id} todo={itemTodo} updateItem={updateItem} deleteItem={deleteItem}/>
+          )) : itemListActive.map((itemTodo) => (
+            <Item key = {itemTodo.id} todo={itemTodo} updateItem={updateItem} deleteItem={deleteItem}/>
+          ))}
         </ul>
       </section>
 
@@ -89,17 +169,16 @@ function List(){
         </span>
         <ul className="filters">
           <li>
-            <a href='/'>All</a>
-              
+            <p onClick={setStateOne}>All</p>              
           </li>
           <li>
-            <a href='/'>Active</a>
+            <p onClick={createListActive}>Active</p>
           </li>
           <li>
-            <a href='/'>Completed</a>
+            <p onClick={createListDone}>Completed</p>
           </li>
         </ul>
-          <button className="clear-completed">
+          <button className="clear-completed" onClick={clearCompleted}>
             Clear completed
           </button>
       </footer>
