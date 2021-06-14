@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import {useState} from 'react'
 
 function Item ({todo, updateItem, deleteItem}){
 
@@ -26,15 +26,15 @@ function Item ({todo, updateItem, deleteItem}){
     
     if(e.key === "Enter"){  
       e.preventDefault();
-      if(e.target.value !== ''){
+      if(e.target.value === ''){
+        deleteItem(todo);
+        setEdit(false);
+      }
+      else{
         todo.label = label;      
         updateItem(todo);
         setEdit(false);
         setLabel('');
-      }
-      else{ 
-        deleteItem(todo);
-        setEdit(false);
       }
     }
     if(e.key ==="Escape"){
