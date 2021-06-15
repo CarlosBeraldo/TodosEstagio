@@ -4,7 +4,7 @@ import Item from './Item';
 import {v4 as uuidv4} from 'uuid';
 
 function List(){
-  //Criação das constantes
+  //Criação das constantes com estados para que seja feita a alteração. utilizando o hook useState
 
   /*Lista principal onde será armazenada o que estiver no localStorage
    *Se nada estiver adicionado inicia uma lista vazia
@@ -191,37 +191,49 @@ function List(){
     }      
     );
 
+    //cria uma nova lista de concluidos filtrando a nova lista criada, filtrando o done do item se verdadeiro
     const newListDone = newList.filter((itemtodo) => 
     itemtodo.done
     );
 
+    //cria uma nova lista de activos filtrando a nova lista criada, filtrando o done do item se falso
     const newListActive = newList.filter((itemtodo) => 
     !itemtodo.done
     );
 
+    //Atualiza a lista de ativos com a nova lista de ativos
     setitemListActive(newListActive);
+    //Atualiza a lista de concluidos a nova lista de concluidos
     setitemListDone(newListDone);
-
+    //Atualiza o check pelo valor inverso dele
     setcheck(!check);
+    //Atualiza o local storage com a nova lista principal
     updadeLocalStorage(newList);
   }
   
   function clearCompleted(){
+
+    //Cria uma nova lista através da função filter aplicada na lista principal (retorna apenas os valores que passaram pelo filtro)
     const newList = itemList.filter((itemtodo) => 
-      itemtodo.done === false && {...itemtodo} 
+    //Caso o atributo done da lista for false ele retorna o item
+      itemtodo.done === false 
     );
 
+    //cria uma nova lista de concluidos filtrando a nova lista criada, filtrando o done do item se verdadeiro
     const newListDone = newList.filter((itemtodo) => 
-    itemtodo.done && {...itemtodo}
+    itemtodo.done
     );
 
+    //cria uma nova lista de activos filtrando a nova lista criada, filtrando o done do item se falso
     const newListActive = newList.filter((itemtodo) => 
-    !itemtodo.done && {...itemtodo}
+    !itemtodo.done
     );
 
+    //Atualiza a lista de ativos com a nova lista de ativos
     setitemListActive(newListActive);
+    //Atualiza a lista de concluidos a nova lista de concluidos
     setitemListDone(newListDone);
-
+    //Atualiza o local storage com a nova lista principal
     updadeLocalStorage(newList);
   }
 
@@ -247,6 +259,11 @@ function List(){
         <label htmlFor="toggle-all" />
         <ul className="todo-list">
           {
+          /*Dois ternários juntos que verificam o state
+          * caso state === 1 mapea a lista principal e cria o componente Item com os objetos da lista e suas propriedades
+          * caso state === 2 mapea a lista de concluidos e cria o componente Item com os objetos da lista e suas propriedades
+          * caso state === 3 mapea a lista de ativos e cria o componente Item com os objetos da lista e suas propriedades
+          */
           state === 1 ? itemList.map((itemTodo) => (
             <Item key = {itemTodo.id} todo={itemTodo} updateItem={updateItem} deleteItem={deleteItem}/>
           )) : state === 2 ? itemListDone.map((itemTodo) => (
