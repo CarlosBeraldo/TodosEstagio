@@ -80,7 +80,7 @@ function Item ({todo, updateItem, deleteItem}){
       <label onDoubleClick={onDoubleClick}>{todo.label}</label>
       <button className="destroy" onClick={onClickDel} />
     </div>
-    {//onKeyPress nao identifica a tecla Escape(Esc)
+    {//onKeyPress nao identifica a tecla Escape(Esc) por conta disso foi utilizado onKeyDown
     }
     <input className='edit' onKeyDown={useEnterEscape} value={label} onChange={onChangeText}/>
     </li>
