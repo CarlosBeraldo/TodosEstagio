@@ -18,7 +18,7 @@ function List(){
   //Constante para verificar a quantidade de items ativos
   const [count, setCount] = useState(0);
   
-  //Identifica se o botao de marcar ToDos como done foi precionado
+  //Identifica se o botao de marcar ToDos como done foi precionado para alterar os valores done da lista
   const [check, setCheck] = useState(false);
   
   //Listas auxiliares para exibir e alterar as listas de ToDo concluido ou ativos
@@ -31,6 +31,7 @@ function List(){
   //3 para exibir apenas os ativos
   const [state, setState] = useState(1);
 
+  //Verifica se todos os items da lista estão marcados como concluidos
   const [checkAllDone, setCheckAllDone] = useState(false);
 
   //Função responsavel para tornar o STATE como 1 
@@ -96,6 +97,7 @@ function List(){
     //Atualiza a lista de concluidos a nova lista de concluidos
     setItemListDone(newListDone);
 
+    //Verifica se todos os items estão marcados como concluidos
     const allDone = itemList.filter((itemtodo) => !itemtodo.done );
     if(allDone > [] ){
       setCheckAllDone(false);
@@ -225,7 +227,8 @@ function List(){
           onChange={useOnChange}
         />
       </header>
-      {itemList > [] && (
+      {//Caso lista vazia não cria a estrutura section
+      itemList > [] && (
       <section className="main">
         <input
           id="toggle-all"
@@ -252,7 +255,8 @@ function List(){
         </ul>
       </section>
       )}
-      {itemList > [] && (
+      {//Caso lista vazia não cria a estrutura fiiter
+      itemList > [] && (
       <footer className="footer">
         <span className="todo-count">
           <strong>{count}</strong> items left
