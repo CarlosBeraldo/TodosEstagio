@@ -13,23 +13,25 @@ function List(){
   
   //Constante de label utilizada para saber se usuario ja digitou algo
   //Caso nulo é exibido o placeholder
-  const [label, setlabel] = useState('');
+  const [label, setLabel] = useState('');
   
   //Constante para verificar a quantidade de items ativos
-  const [count, setcount] = useState(0);
+  const [count, setCount] = useState(0);
   
   //Identifica se o botao de marcar ToDos como done foi precionado
-  const [check, setcheck] = useState(false);
+  const [check, setCheck] = useState(false);
   
   //Listas auxiliares para exibir e alterar as listas de ToDo concluido ou ativos
-  const [itemListDone, setitemListDone] = useState([]);
-  const [itemListActive, setitemListActive] = useState([]);
+  const [itemListDone, setItemListDone] = useState([]);
+  const [itemListActive, setItemListActive] = useState([]);
   
   //Identifica qual lista será exibida
   //1 para exibir ToDos dones e actives
   //2 para exibir apenas os concluidos
   //3 para exibir apenas os ativos
   const [state, setState] = useState(1);
+
+  const [checkAllDone, setCheckAllDone] = useState(false);
 
   //Função responsavel para tornar o STATE como 1 
   //É acionada quando clique em "All"
@@ -42,7 +44,7 @@ function List(){
   */
   function createListDone(){
     //filta a lista principal armazenando apenas items concluidos
-    setitemListDone(itemList.filter((itemtodo) => 
+    setItemListDone(itemList.filter((itemtodo) => 
       itemtodo.done && {...itemtodo}
     ));
     //torna STATE para 2
@@ -54,7 +56,7 @@ function List(){
   */
   function createListActive(){
     //filta a lista principal armazenando apenas items ativos
-    setitemListActive(itemList.filter((itemtodo) => 
+    setItemListActive(itemList.filter((itemtodo) => 
       !itemtodo.done && {...itemtodo}
     ));
     //torna STATE para 3
@@ -75,9 +77,34 @@ function List(){
     * reduce(função,0) 
     * valor inicial é iniciada em 0 pela passagem de parametro 
     */
-    setcount(itemList.reduce((result,itemTodo) => {
+    setCount(itemList.reduce((result,itemTodo) => {
       return result + (itemTodo.done ? 0 : 1);
     }, 0))
+
+    //cria uma nova lista de concluidos filtrando a nova lista criada, filtrando o done do item se verdadeiro
+    const newListDone = itemList.filter((itemtodo) => 
+    itemtodo.done
+    );
+
+    //cria uma nova lista de activos filtrando a nova lista criada, filtrando o done do item se falso
+    const newListActive = itemList.filter((itemtodo) => 
+    !itemtodo.done
+    );
+
+    //Atualiza a lista de ativos com a nova lista de ativos
+    setItemListActive(newListActive);
+    //Atualiza a lista de concluidos a nova lista de concluidos
+    setItemListDone(newListDone);
+
+    const allDone = itemList.filter((itemtodo) => !itemtodo.done );
+    if(allDone > [] ){
+      setCheckAllDone(false);
+      setCheck(false);
+    }else{
+      setCheckAllDone(true);
+      setCheck(true);
+    }
+
   }, [itemList])
 
   //Função responsavel por adicionar um novo item na lista principal e ativas
@@ -98,7 +125,7 @@ function List(){
       //Atualiza o local storage com a nova lista criada
       updadeLocalStorage(newList);
       //Atualiza de ativos copiando a lista de ativos atual e adicionando o novo item no final
-      setitemListActive([...itemListActive,newItem]);
+      setItemListActive([...itemListActive,newItem]);
     }
     
   }
@@ -117,16 +144,6 @@ function List(){
       (itemtodo) => itemtodo.id === id ? {...item} : itemtodo
     );
 
-    //cria uma nova lista de concluidos filtrando a nova lista criada, filtrando o done do item se verdadeiro
-    const newListDone = newList.filter((itemtodo) => itemtodo.done );
-    
-    //cria uma nova lista de activos filtrando a nova lista criada, filtrando o done do item se falso
-    const newListActive = newList.filter((itemtodo) => !itemtodo.done );
-
-    //Atualiza a lista de ativos com a nova lista de ativos
-    setitemListActive(newListActive);
-    //Atualiza a lista de concluidos a nova lista de concluidos
-    setitemListDone(newListDone);
     //Atualiza o local storage com a nova lista principal
     updadeLocalStorage(newList);
   }
@@ -143,19 +160,6 @@ function List(){
     //se o item passado no parametro por diferente do item da lista, é retornado o item para nova lista
         itemtodo.id !==  id
     )
-    //cria uma nova lista de concluidos filtrando a nova lista criada, filtrando o done do item se verdadeiro
-    const newListDone = newList.filter((itemtodo) => 
-    itemtodo.done
-    );
-    //cria uma nova lista de activos filtrando a nova lista criada, filtrando o done do item se falso
-    const newListActive = newList.filter((itemtodo) => 
-    !itemtodo.done
-    );
-
-    //Atualiza a lista de ativos com a nova lista de ativos
-    setitemListActive(newListActive);
-    //Atualiza a lista de concluidos a nova lista de concluidos
-    setitemListDone(newListDone);
     //Atualiza o local storage com a nova lista principal
     updadeLocalStorage(newList);
   }
@@ -167,12 +171,12 @@ function List(){
     {
       e.preventDefault();
       addItem(label);
-      setlabel('');
+      setLabel('');
     }
   }
   //Função para atualizar o valor da label é chamada sempre que ocorreu uma alteração no input
   function useOnChange(e){
-    setlabel(e.target.value);
+    setLabel(e.target.value);
   }
 
   //Função de atualizar o local storage e a lista lista principal
@@ -188,25 +192,11 @@ function List(){
       //se check for true muda todos os done para false e vise versa 
       itemtodo.done = check ? false : true;
       return {...itemtodo}
-    }      
+    } 
     );
 
-    //cria uma nova lista de concluidos filtrando a nova lista criada, filtrando o done do item se verdadeiro
-    const newListDone = newList.filter((itemtodo) => 
-    itemtodo.done
-    );
-
-    //cria uma nova lista de activos filtrando a nova lista criada, filtrando o done do item se falso
-    const newListActive = newList.filter((itemtodo) => 
-    !itemtodo.done
-    );
-
-    //Atualiza a lista de ativos com a nova lista de ativos
-    setitemListActive(newListActive);
-    //Atualiza a lista de concluidos a nova lista de concluidos
-    setitemListDone(newListDone);
     //Atualiza o check pelo valor inverso dele
-    setcheck(!check);
+    setCheck(!check);
     //Atualiza o local storage com a nova lista principal
     updadeLocalStorage(newList);
   }
@@ -219,20 +209,6 @@ function List(){
       itemtodo.done === false 
     );
 
-    //cria uma nova lista de concluidos filtrando a nova lista criada, filtrando o done do item se verdadeiro
-    const newListDone = newList.filter((itemtodo) => 
-    itemtodo.done
-    );
-
-    //cria uma nova lista de activos filtrando a nova lista criada, filtrando o done do item se falso
-    const newListActive = newList.filter((itemtodo) => 
-    !itemtodo.done
-    );
-
-    //Atualiza a lista de ativos com a nova lista de ativos
-    setitemListActive(newListActive);
-    //Atualiza a lista de concluidos a nova lista de concluidos
-    setitemListDone(newListDone);
     //Atualiza o local storage com a nova lista principal
     updadeLocalStorage(newList);
   }
@@ -249,12 +225,14 @@ function List(){
           onChange={useOnChange}
         />
       </header>
+      {itemList > [] && (
       <section className="main">
         <input
           id="toggle-all"
           type="checkbox"
           className="toggle-all"
-          onClick={doneAll}
+          checked={checkAllDone}
+          onChange={doneAll}
         />
         <label htmlFor="toggle-all" />
         <ul className="todo-list">
@@ -273,7 +251,8 @@ function List(){
           ))}
         </ul>
       </section>
-
+      )}
+      {itemList > [] && (
       <footer className="footer">
         <span className="todo-count">
           <strong>{count}</strong> items left
@@ -293,6 +272,7 @@ function List(){
             Clear completed
           </button>
       </footer>
+      )}
     </React.Fragment>
   )
 }
